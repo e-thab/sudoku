@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://scenes/Square.gd" type="Script" id=1]
+[ext_resource path="res://scenes/Cell.gd" type="Script" id=1]
 [ext_resource path="res://assets/Sq.png" type="Texture" id=2]
 [ext_resource path="res://assets/8bitoperator.ttf" type="DynamicFontData" id=3]
 
@@ -8,13 +8,13 @@
 size = 20
 font_data = ExtResource( 3 )
 
-[sub_resource type="StyleBoxEmpty" id=2]
-
 [sub_resource type="DynamicFont" id=3]
 size = 75
 font_data = ExtResource( 3 )
 
-[node name="Square" type="Control"]
+[sub_resource type="StyleBoxEmpty" id=2]
+
+[node name="Cell" type="Control"]
 anchor_left = 0.444
 anchor_top = 0.444
 anchor_right = 0.556
@@ -25,10 +25,8 @@ margin_right = -0.456055
 margin_bottom = -0.456055
 rect_min_size = Vector2( 114, 114 )
 focus_mode = 1
+mouse_default_cursor_shape = 2
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Hover_Highlight" type="TextureRect" parent="."]
 visible = false
@@ -44,7 +42,7 @@ __meta__ = {
 
 [node name="Select_Highlight" type="TextureRect" parent="."]
 visible = false
-self_modulate = Color( 0.929412, 0.913725, 0.537255, 1 )
+self_modulate = Color( 0.458824, 0.819608, 0.745098, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource( 2 )
@@ -55,7 +53,6 @@ __meta__ = {
 }
 
 [node name="Notes" type="GridContainer" parent="."]
-modulate = Color( 0.360784, 0.360784, 0.360784, 1 )
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -68,11 +65,9 @@ rect_min_size = Vector2( 114, 114 )
 custom_constants/vseparation = 0
 custom_constants/hseparation = 0
 columns = 3
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="1" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_right = 38.0
 margin_bottom = 38.0
 rect_min_size = Vector2( 38, 38 )
@@ -83,6 +78,7 @@ align = 1
 valign = 1
 
 [node name="2" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_left = 38.0
 margin_right = 76.0
 margin_bottom = 38.0
@@ -93,6 +89,7 @@ align = 1
 valign = 1
 
 [node name="3" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_left = 76.0
 margin_right = 114.0
 margin_bottom = 38.0
@@ -103,6 +100,7 @@ align = 1
 valign = 1
 
 [node name="4" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_top = 38.0
 margin_right = 38.0
 margin_bottom = 76.0
@@ -113,6 +111,7 @@ align = 1
 valign = 1
 
 [node name="5" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_left = 38.0
 margin_top = 38.0
 margin_right = 76.0
@@ -124,6 +123,7 @@ align = 1
 valign = 1
 
 [node name="6" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_left = 76.0
 margin_top = 38.0
 margin_right = 114.0
@@ -135,6 +135,7 @@ align = 1
 valign = 1
 
 [node name="7" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_top = 76.0
 margin_right = 38.0
 margin_bottom = 114.0
@@ -145,6 +146,7 @@ align = 1
 valign = 1
 
 [node name="8" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_left = 38.0
 margin_top = 76.0
 margin_right = 76.0
@@ -156,6 +158,7 @@ align = 1
 valign = 1
 
 [node name="9" type="Label" parent="Notes"]
+self_modulate = Color( 1, 1, 1, 0 )
 margin_left = 76.0
 margin_top = 76.0
 margin_right = 114.0
@@ -176,13 +179,15 @@ margin_top = -57.0
 margin_right = 57.0
 margin_bottom = 57.0
 rect_min_size = Vector2( 114, 114 )
-custom_styles/normal = SubResource( 2 )
 custom_fonts/font = SubResource( 3 )
+custom_styles/normal = SubResource( 2 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
-[connection signal="focus_entered" from="." to="." method="_on_Square_focus_entered"]
-[connection signal="focus_exited" from="." to="." method="_on_Square_focus_exited"]
-[connection signal="mouse_entered" from="." to="." method="_on_Square_mouse_entered"]
-[connection signal="mouse_exited" from="." to="." method="_on_Square_mouse_exited"]
+
+[connection signal="focus_entered" from="." to="." method="_on_Cell_focus_entered"]
+[connection signal="focus_exited" from="." to="." method="_on_Cell_focus_exited"]
+[connection signal="gui_input" from="." to="." method="_on_Cell_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_Cell_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_Cell_mouse_exited"]
