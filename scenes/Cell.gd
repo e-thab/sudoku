@@ -90,6 +90,11 @@ func input_solution(n):
 	emit_signal("solve", col, row, box, n)
 
 
+func show_solution():
+	$Solution.text = str(solution)
+	$Solution.self_modulate = Color.black
+
+
 func input_is_num(event):
 	return event is InputEventKey and event.is_pressed()
 
