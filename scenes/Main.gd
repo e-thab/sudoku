@@ -45,7 +45,7 @@ func generate_board():
 	]
 	
 	for x in trivial_board:
-		x.insert(0, null)
+		x.insert(0, null)	#1-indexing
 		solutions.append(x)
 	
 	for x in solutions:
