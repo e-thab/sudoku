@@ -2,7 +2,7 @@ extends Control
 
 signal solve(col, row, box, n)
 
-var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # possible answers, culled after solution generated
+var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after solution generated
 var notes = [] # user notes
 var note_mode = false	# distinguish when entering solution (false) vs entering note (true)
 
@@ -20,12 +20,20 @@ var CELL_YELLOW = Color("ede989")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#tbd: apply solution number?
+	set_bg()
 	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
+
+
+func reset():
+	solution = 0
+	solved = false
+	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+	notes = []
 
 
 func set_coords():
@@ -39,6 +47,17 @@ func set_coords():
 	col += 1	#1-indexing
 	row += 1
 	box += 1
+
+func random_choice(arr):
+	# Return random element from array
+	if arr:
+		return arr[randi() % len(arr)]
+
+
+func set_solution(n):
+	solution = n
+	emit_signal("solve", col, row, box, n)
+#	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 func add_note(n):
@@ -72,6 +91,18 @@ func hide_notes():
 	$Notes.modulate = Color.transparent
 
 
+func show_markup():
+	for n in range(1, 10):
+		if n in markup:
+			add_note(n)
+		elif n in notes:
+			remove_note(n)
+
+
+func highlight_markup(n):
+	$Notes.get_child(n-1).self_modulate = $Background.self_modulate.inverted()
+
+
 func remove_markup(n):
 	n = int(n)
 	markup.erase(n)
@@ -79,15 +110,23 @@ func remove_markup(n):
 
 func input_solution(n):
 	n = int(n)
-	if n == solution:
-		$Solution.self_modulate = Color.white
-	else:
-		$Solution.self_modulate = Color.crimson
+	$Solution.self_modulate = Color.white
+#	if n == solution:
+#		$Solution.self_modulate = Color.white
+#	else:
+#		$Solution.self_modulate = Color.crimson
 	
 	$Solution.text = str(n)
 	$Notes.visible = false
+	$Background.self_modulate = Color.black
 	solved = true
 	emit_signal("solve", col, row, box, n)
+
+
+func input_random_solution():
+	if solved: return
+	var rand = random_choice(markup)
+	input_solution(rand)
 
 
 func show_solution():
@@ -95,8 +134,42 @@ func show_solution():
 	$Solution.self_modulate = Color.black
 
 
+func set_bg():
+	if solved: return
+	
+	var color = Color.black
+	match len(markup):
+		1:
+			color = Color(1, 0, 0)
+		2:
+			color = Color(1, 0.33, 0)
+		3:
+			color = Color(1, 0.67, 0)
+		4:
+			color = Color(1, 1, 0)
+		5:
+			color = Color(0.67, 1, 0)
+		6:
+			color = Color(0.33, 1, 0)
+		7:
+			color = Color(0, 1, 0)
+		8:
+			color = Color(0, 1, 0.33)
+		9:
+			color = Color(0, 1, 0.67)
+	$Background.self_modulate = color
+
+
+#func remove_solution():
+#	$Solution.text = ''
+#	$Notes.visible = true
+#	solved = false
+
+
 func input_is_num(event):
-	return event is InputEventKey and event.is_pressed()
+	if event is InputEventKey and event.is_pressed():
+		return interpret_num(event) != null
+	return false
 
 func interpret_num(event):
 	var input_string = OS.get_scancode_string(event.scancode)
@@ -128,17 +201,24 @@ func _on_Cell_mouse_exited():
 
 
 func _on_Cell_gui_input(event):
-	if has_focus() and Input.is_action_just_pressed("ui_cancel"):
-		release_focus()
-	
-	elif has_focus() and input_is_num(event):
-		var num = interpret_num(event)
-		if num != null:
-			if note_mode:
-				add_note(num)
-			else:
-				input_solution(num)
-				release_focus()
+	if has_focus():
+		if Input.is_action_just_pressed("ui_cancel"):
+			release_focus()
+		
+#		elif Input.is_action_just_pressed("delete"):
+#			remove_solution()
+		
+		elif Input.is_action_just_pressed("random_val"):
+			input_random_solution()
+		
+		elif input_is_num(event):
+			var num = interpret_num(event)
+			if num != null:
+				if note_mode:
+					add_note(num)
+				else:
+					input_solution(num)
+					release_focus()
 	
 	elif Input.is_action_just_pressed("note"):
 		grab_focus()

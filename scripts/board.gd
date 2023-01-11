@@ -1,184 +1,167 @@
 extends Node
 
-class_name Board
-
 # Declare member variables here. Examples:
-var rows = [null, [], [], [], [], [], [], [], [], []]
-var cols = [null, [], [], [], [], [], [], [], [], []]
-var boxes = [null, [], [], [], [], [], [], [], [], []]
-var solutions = [null]
+var rows = [null, [], [], [], [], [], [], [], [], []]	#2D array [row][row index]
+var cols = [null, [], [], [], [], [], [], [], [], []]	#2D array [col][col index]
+var boxes = [null, [], [], [], [], [], [], [], [], []]	#2D array [box][col index]
+var solutions = [null]	# Array of solutions, 1-indexed
+							# Above arrays are 1-indexed for sudoku standards
+							# Boxes indexed left to right, top to bottom
+var cells = []	# Holds references to each cell, top left to bottom right
 
 
-func _init():
-	generate()
+#func _init():
+#	print("init")
+
+
+func _ready():
+	for cell in get_children():
+		cell.set_coords()
+		cells.append(cell)
+		rows[cell.row].append(cell)
+		cols[cell.col].append(cell)
+		boxes[cell.box].append(cell)
+		cell.connect("solve", self, "_on_solve")
+		cell.show_markup()
+	#generate()
+	
+#	for cell in cells:
+#		# delete this
+#		cell.show_solution()
 
 
 func generate():
-#	rows = [
-#		[1, 2, 3,	4, 5, 6,	7, 8, 9],	# begin with trivial board
-#		[4, 5, 6,	7, 8, 9,	1, 2, 3],
-#		[7, 8, 9,	1, 2, 3,	4, 5, 6],
-#
-#		[2, 3, 1,	5, 6, 4,	8, 9, 7],
-#		[5, 6, 4,	8, 9, 7,	2, 3, 1],
-#		[8, 9, 7,	2, 3, 1,	5, 6, 4],
-#
-#		[3, 1, 2,	6, 4, 5,	9, 7, 8],
-#		[6, 4, 5,	9, 7, 8,	3, 1, 2],
-#		[9, 7, 8,	3, 1, 2,	6, 4, 5],
-#	]
-#
-#	shuffle()
-	rows = random_rows()
-	
+	print("generating")
 	solutions = [null]
-	for x in rows:			#load into solutions
-		x.insert(0, null)	#1-indexing
-		solutions.append(x)
+	randomize_board()
 	
-	cols = _rows_to_cols(rows)
-	# populate boxes
+	#for x in rows:			#load into solutions
+	#	x.insert(0, null)	#1-indexing
+	#	solutions.append(x)
+	
+	#cols = _rows_to_cols(rows)
+	# populate boxes?
 	
 	for x in solutions:
 		print(x)
 
 
-func random_rows():
-	var rands = []
-	for i in range(9):
-		rands.append(range(9))
+func randomize_board():
+	# 1: find next empty cell, prioritizing fewest remaining possibilities
+	# 2: generate a random number from those possibilities
+	# 3: fill cell
+	# 4: remove that random from markups of associated cells
+	# 5: repeat.
 	
-	for num in range(1, 10):
-		var available_rows = range(9)
-		var available_cols = range(9)
+	#var rnd = randi() % 9 + 1
+	#cells[0].set_solution(rnd)	# Set first rand solution in top left cell
+	
+	for cell in cells:
+		var min_cell = min_possible_cell()			# Get minimum possible solution cell
 		
-		for i in range(9):
-			if i < 8:
-				available_rows.shuffle()
-				available_cols.shuffle()
-				#var rnd = randi() % len(available_rows)
-			
-			var row_pos = available_rows.pop_back()
-			var col_pos = available_cols.pop_back()
-			remove_box(available_rows, row_pos)
-			remove_box(available_cols, col_pos)
-			
-			rands[row_pos][col_pos] = num
-	
-	for r in rands:
-		print(r)
-	
-	return rands
-
-
-func remove_box(arr, item):
-	# removes numbers in array associated with same box
-	# e.g. if index is 4, remove (3, 4, 5)
-	# if index is 0, remove (0, 1, 2)
-	if item in [0, 1, 2]:
-		arr.remove(0)
-		arr.remove(1)
-		arr.remove(2)
-	
-	elif item in [3, 4, 5]:
-		arr.remove(3)
-		arr.remove(4)
-		arr.remove(5)
-	
-	elif item in [6, 7, 8]:
-		arr.remove(6)
-		arr.remove(7)
-		arr.remove(8)
-
-
-func shuffle():
-	shuffle_box_cols()	# randomly order 9x3 cols
-	shuffle_box_rows()	# randomly order 9x3 rows
-	shuffle_cols()		# randomly order each set of 3 cols
-	shuffle_rows()		# randomly order each set of 3 rows
-	shuffle_values()	# randomly swap pairs of cell values
-	# ^ bad solution
-
-
-func shuffle_values():
-	var nums = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-	nums.shuffle()
-	
-	for n in nums:
-		if n-1 != nums[n-1]:
-			value_swap(n, nums[n-1])
-
-
-func value_swap(val1, val2):
-	if val1 == val2:
-		return
-	
-	#print('swapping ', val1, ' with ', val2)
-	for row in rows:
-		for i in range(9):
-			if row[i] == val1:
-				row[i] = val2
-				
-			elif row[i] == val2:
-				row[i] = val1
-
-
-func shuffle_box_rows():
-	var rnd = [0, 1, 2]
-	rnd.shuffle()
-	print(rnd)
-	
-	var rows_copy = rows.duplicate()
-	
-	for i in range(3):
-		for j in range(3):
-			rows[i*3 + j] = rows_copy[rnd[i]*3 + j]
-
-
-func shuffle_box_cols():
-	var rnd = [0, 1, 2]
-	rnd.shuffle()
-	print(rnd)
-	
-	cols = _rows_to_cols(rows)
-	var cols_copy = cols.duplicate()
-	
-	for i in range(3):
-		for j in range(3):
-			cols[i*3 + j] = cols_copy[rnd[i]*3 + j]
-	
-	rows = _rows_to_cols(cols)
-
-
-func shuffle_rows():
-	for i in [0, 3, 6]:
-		var rnd = [0, 1, 2]
-		rnd.shuffle()
-		print(rnd)
+		var only = false
+		# if there is a number in that row/col/box that can only go in that cell,
+		# even if the cell has other possibilities that number should be entered
 		
-		var original = []
-		for j in range(3):
-			original.append(rows[i + j])
-		
-		for j in range(3):
-			rows[i + j] = original[rnd[j]]
+		var rnd = random_choice(min_cell.markup)	# Generate random int from its solutions
+		min_cell.set_solution(rnd)					# Set cell solution to the random int
+		#_on_solve(cell.col, cell.row, cell.box, rnd)	#"Solve" cell to remove markups
+		print('Setting cell (', min_cell.col, ', ', min_cell.row, ') to ', rnd)
+	
+	for cell in cells:
+		solutions.append(cell.solution)
+	
 
 
-func shuffle_cols():
-	for i in [0, 3, 6]:
-		var rnd = [0, 1, 2]
-		rnd.shuffle()
-		print(rnd)
-		cols = _rows_to_cols(rows)
-		
-		var original = []
-		for j in range(3):
-			original.append(cols[i + j])
-		
-		for j in range(3):
-			cols[i + j] = original[rnd[j]]
-		
-		rows = _rows_to_cols(cols)
+func min_possible_cell():
+	# Return the cell object with the fewest remaining solution possibilities
+	# In a tie, return first from top left to bottom right
+	var min_amt = 10
+	var min_cell
+	
+	for cell in cells:
+		if (cell.solution == 0) and (len(cell.markup) < min_amt):
+			min_cell = cell
+			min_amt = len(cell.markup)
+	
+	return min_cell
+
+
+func random_choice(arr):
+	# Return random element from array
+	if arr:
+		return arr[randi() % len(arr)]
+
+#func remove_box(arr, item):
+#	# removes numbers in array associated with same box
+#	# e.g. if index is 4, remove (3, 4, 5)
+#	# if index is 0, remove (0, 1, 2)
+#	if item in [0, 1, 2]:
+#		arr.remove(0)
+#		arr.remove(1)
+#		arr.remove(2)
+#
+#	elif item in [3, 4, 5]:
+#		arr.remove(3)
+#		arr.remove(4)
+#		arr.remove(5)
+#
+#	elif item in [6, 7, 8]:
+#		arr.remove(6)
+#		arr.remove(7)
+#		arr.remove(8)
+
+
+#func value_swap(val1, val2):
+#	if val1 == val2:
+#		return
+#
+#	#print('swapping ', val1, ' with ', val2)
+#	for row in rows:
+#		for i in range(9):
+#			if row[i] == val1:
+#				row[i] = val2
+#
+#			elif row[i] == val2:
+#				row[i] = val1
+
+
+func find_lonely():
+	for cell in cells:
+		for n in cell.markup:
+			if is_lonely(cell.col, cell.row, cell.box, n):
+				cell.highlight_markup(n)
+
+
+func is_lonely(col, row, box, n):
+	var found = 0
+	for cell in cols[col]:
+		if !cell.solved and n in cell.markup:
+			found += 1
+		if found > 1:
+			break
+	if found == 1:
+		return true
+	
+	found = 0
+	for cell in rows[row]:
+		if !cell.solved and n in cell.markup:
+			found += 1
+		if found > 1:
+			break
+	if found == 1:
+		return true
+	
+	found = 0
+	for cell in boxes[box]:
+		if !cell.solved and n in cell.markup:
+			found += 1
+		if found > 1:
+			break
+	if found == 1:
+		return true
+	
+	return false
 
 
 func _rows_to_cols(old):
@@ -188,3 +171,22 @@ func _rows_to_cols(old):
 		for j in range(9):
 			new[i].append(old[j][i])
 	return new
+
+
+func _on_solve(col, row, box, n):
+	for cell in rows[row]:
+		cell.remove_markup(n)
+		cell.remove_note(n)
+		cell.set_bg()
+		
+	for cell in cols[col]:
+		cell.remove_markup(n)
+		cell.remove_note(n)
+		cell.set_bg()
+		
+	for cell in boxes[box]:
+		cell.remove_markup(n)
+		cell.remove_note(n)
+		cell.set_bg()
+	
+	find_lonely()

@@ -1,0 +1,16 @@
+Each step done from top left to bottom right:
+
+1. Fill each cell in top left box with a random number from markup
+
+2. Do the same for the bottom right?
+
+3. Begin filling in the top right box. Find the cell with the least available options and choose a random markup number.
+
+4. Until the top right box is completed, first check the entire board for lonely digits and fill the cell if it exists, otherwise find naked singles and fill them, otherwise find the next cell with the least available options in the top right box to fill and choose a random markup number.
+
+5. Do the same for the bottom left
+6. Top middle
+7. Bottom middle
+8. Left middle
+9. Right middle
+10. Middle. Fin
