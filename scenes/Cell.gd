@@ -6,6 +6,7 @@ var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after
 var notes = [] # user notes
 var note_mode = false	# distinguish when entering solution (false) vs entering note (true)
 
+var solutions = []
 var solution = 0
 var solved = false
 var col = -1
@@ -20,7 +21,7 @@ var CELL_YELLOW = Color("ede989")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#tbd: apply solution number?
-	set_bg()
+	#set_bg()
 	pass # Replace with function body.
 
 
@@ -34,6 +35,7 @@ func reset():
 	solved = false
 	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 	notes = []
+	#set_bg()
 
 
 func set_coords():
@@ -120,6 +122,8 @@ func input_solution(n):
 	$Notes.visible = false
 	$Background.self_modulate = Color.black
 	solved = true
+	solution = n
+	solutions.append(n)
 	emit_signal("solve", col, row, box, n)
 
 
@@ -134,11 +138,29 @@ func show_solution():
 	$Solution.self_modulate = Color.black
 
 
+func show_average():
+	var avg = avg(solutions)
+	$Solution.text = str(avg)
+	#$Solution.self_modulate = Color.black
+
+
+func avg(arr):
+	if arr:
+		var t = 0
+		for x in arr:
+			t += x
+		return t / len(arr)
+
+
 func set_bg():
-	if solved: return
+	var value
+	if solved:
+		value = solution
+	else:
+		value = len(markup)
 	
 	var color = Color.black
-	match len(markup):
+	match value:
 		1:
 			color = Color(1, 0, 0)
 		2:

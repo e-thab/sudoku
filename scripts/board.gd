@@ -8,6 +8,7 @@ var solutions = [null]	# Array of solutions, 1-indexed
 							# Above arrays are 1-indexed for sudoku standards
 							# Boxes indexed left to right, top to bottom
 var cells = []	# Holds references to each cell, top left to bottom right
+var solved = 0
 
 
 #func _init():
@@ -15,6 +16,8 @@ var cells = []	# Holds references to each cell, top left to bottom right
 
 
 func _ready():
+	randomize()
+	
 	for cell in get_children():
 		cell.set_coords()
 		cells.append(cell)
@@ -28,12 +31,26 @@ func _ready():
 #	for cell in cells:
 #		# delete this
 #		cell.show_solution()
+	avg_test()
+
+
+func avg_test():
+	for _i in range(50):
+		randomize_board()
+		for cell in cells:
+			cell.reset()
+		
+	for cell in cells:
+		cell.show_average()
 
 
 func generate():
-	print("generating")
+	#print("generating")
 	solutions = [null]
 	randomize_board()
+	
+#	for cell in cells:
+#		cell.set_bg()
 	
 	#for x in rows:			#load into solutions
 	#	x.insert(0, null)	#1-indexing
@@ -42,35 +59,33 @@ func generate():
 	#cols = _rows_to_cols(rows)
 	# populate boxes?
 	
-	for x in solutions:
-		print(x)
+#	for x in solutions:
+#		print(x)
 
 
 func randomize_board():
-	# 1: find next empty cell, prioritizing fewest remaining possibilities
-	# 2: generate a random number from those possibilities
-	# 3: fill cell
-	# 4: remove that random from markups of associated cells
-	# 5: repeat.
+	# 1: find any cells with lonely digits, fill them if they exist
+	# 2: find any cells with naked singles, fill them if they exist
+	# 3: find the next unsolved cell with the fewest possibilities
+	# 4: fill cell with a random number generated from those possibilities
+	# 5: repeat
 	
 	#var rnd = randi() % 9 + 1
 	#cells[0].set_solution(rnd)	# Set first rand solution in top left cell
-	
-	for cell in cells:
+	while solved < 81:
 		var min_cell = min_possible_cell()			# Get minimum possible solution cell
 		
-		var only = false
-		# if there is a number in that row/col/box that can only go in that cell,
-		# even if the cell has other possibilities that number should be entered
-		
-		var rnd = random_choice(min_cell.markup)	# Generate random int from its solutions
-		min_cell.set_solution(rnd)					# Set cell solution to the random int
-		#_on_solve(cell.col, cell.row, cell.box, rnd)	#"Solve" cell to remove markups
-		print('Setting cell (', min_cell.col, ', ', min_cell.row, ') to ', rnd)
+		if len(min_cell.markup) == 1:
+			var n = min_cell.markup[0]
+			min_cell.input_solution(n)
+		else:
+			var rnd = random_choice(min_cell.markup)		# Generate random int from its solutions
+			min_cell.input_solution(rnd)					# Set cell solution to the random int
+			#print('Setting cell (', min_cell.col, ', ', min_cell.row, ') to ', rnd)
+	solved = 0
 	
-	for cell in cells:
-		solutions.append(cell.solution)
-	
+#	for cell in cells:
+#		solutions.append(cell.solution)
 
 
 func min_possible_cell():
@@ -80,7 +95,7 @@ func min_possible_cell():
 	var min_cell
 	
 	for cell in cells:
-		if (cell.solution == 0) and (len(cell.markup) < min_amt):
+		if (!cell.solved) and (len(cell.markup) < min_amt):
 			min_cell = cell
 			min_amt = len(cell.markup)
 	
@@ -128,9 +143,12 @@ func random_choice(arr):
 
 func find_lonely():
 	for cell in cells:
-		for n in cell.markup:
-			if is_lonely(cell.col, cell.row, cell.box, n):
-				cell.highlight_markup(n)
+		if !cell.solved:
+			for n in cell.markup:
+				if is_lonely(cell.col, cell.row, cell.box, n):
+					#cell.highlight_markup(n)
+					cell.input_solution(n)
+					return
 
 
 func is_lonely(col, row, box, n):
@@ -177,16 +195,17 @@ func _on_solve(col, row, box, n):
 	for cell in rows[row]:
 		cell.remove_markup(n)
 		cell.remove_note(n)
-		cell.set_bg()
+		#cell.set_bg()
 		
 	for cell in cols[col]:
 		cell.remove_markup(n)
 		cell.remove_note(n)
-		cell.set_bg()
+		#cell.set_bg()
 		
 	for cell in boxes[box]:
 		cell.remove_markup(n)
 		cell.remove_note(n)
-		cell.set_bg()
+		#cell.set_bg()
 	
 	find_lonely()
+	solved += 1
