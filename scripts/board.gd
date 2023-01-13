@@ -9,6 +9,8 @@ var solutions = [null]	# Array of solutions, 1-indexed
 							# Boxes indexed left to right, top to bottom
 var cells = []	# Holds references to each cell, top left to bottom right
 var solved = 0
+var error = false
+var errors = 0
 
 
 #func _init():
@@ -35,32 +37,44 @@ func _ready():
 
 
 func avg_test():
-	for _i in range(50):
-		randomize_board()
+# warning-ignore:unused_variable
+	var iterations = 1_000
+	
+	for _i in range(iterations):
+		generate()
 		for cell in cells:
 			cell.reset()
 		
-	for cell in cells:
-		cell.show_average()
+	#for cell in cells:
+		#cell.set_bg()
+		#cell.show_average()
+	print(errors)
+	print('Avg error rate: ', float(errors) / float(iterations))
 
 
 func generate():
 	#print("generating")
-	solutions = [null]
+#	solutions = [null, [], [], [], [], [], [], [], [], []]
 	randomize_board()
 	
 #	for cell in cells:
 #		cell.set_bg()
 	
-	#for x in rows:			#load into solutions
-	#	x.insert(0, null)	#1-indexing
-	#	solutions.append(x)
+#	for i in range(1, len(rows)):			#load into solutions
+#		solutions.append([])
+#		for cell in rows[i]:
+#		#.insert(0, null)	#1-indexing
+#			solutions[i-1].append(cell.solution)
 	
-	#cols = _rows_to_cols(rows)
-	# populate boxes?
+#	for i in range(1, len(rows)):
+#		for cell in rows[i]:
+#			solutions[i].append(cell.solution)
 	
-#	for x in solutions:
-#		print(x)
+#	cols = _rows_to_cols(rows)
+	 #populate boxes?
+	
+	#for x in solutions:
+		#print(x)
 
 
 func randomize_board():
@@ -72,21 +86,51 @@ func randomize_board():
 	
 	#var rnd = randi() % 9 + 1
 	#cells[0].set_solution(rnd)	# Set first rand solution in top left cell
-	while solved < 81:
-		var min_cell = min_possible_cell()			# Get minimum possible solution cell
+	#reset_debug()
+	while solved < 81 and !error:
+		#var min_cell = min_possible_cell()			# Get minimum possible solution cell
+		var next_cell = next_cell()
 		
-		if len(min_cell.markup) == 1:
-			var n = min_cell.markup[0]
-			min_cell.input_solution(n)
+		if len(next_cell.markup) == 0:
+			errors += 1
+			error = true
+		
+		elif next_cell.lonely != 0:
+			next_cell.input_solution(next_cell.lonely)
+			
+#		elif len(next_cell.markup) == 1:
+#			var n = next_cell.markup[0]
+#			next_cell.input_solution(n)
+			
 		else:
-			var rnd = random_choice(min_cell.markup)		# Generate random int from its solutions
-			min_cell.input_solution(rnd)					# Set cell solution to the random int
-			#print('Setting cell (', min_cell.col, ', ', min_cell.row, ') to ', rnd)
+			next_cell.input_random_solution()
+		
+		#mark_lonely()
+	error = false
 	solved = 0
 	
 #	for cell in cells:
 #		solutions.append(cell.solution)
 
+
+func next_cell():
+	var min_amt = 10
+	var next_cell
+	
+	for cell in cells:
+		if !cell.solved:
+			if cell.lonely != 0:
+				return cell
+				#cell.input_solution(cell.lonely)
+			#elif len(cell.markup) == 1:
+				#return cell
+				#cell.input_solution(cell.markup[0])
+			elif len(cell.markup) < min_amt:
+				next_cell = cell
+				min_amt = len(cell.markup)
+		
+	return next_cell
+	
 
 func min_possible_cell():
 	# Return the cell object with the fewest remaining solution possibilities
@@ -141,13 +185,14 @@ func random_choice(arr):
 #				row[i] = val1
 
 
-func find_lonely():
+func mark_lonely():
 	for cell in cells:
 		if !cell.solved:
 			for n in cell.markup:
 				if is_lonely(cell.col, cell.row, cell.box, n):
+					cell.lonely = n
 					#cell.highlight_markup(n)
-					cell.input_solution(n)
+					#cell.input_solution(n)
 					return
 
 
@@ -182,6 +227,20 @@ func is_lonely(col, row, box, n):
 	return false
 
 
+func reset_debug():
+	var file = File.new()
+	file.open("C:/Users/ls/Desktop/out.txt", File.WRITE)
+	file.store_string('')
+	file.close()
+
+func debug_txt(s):
+	var file = File.new()
+	file.open("C:/Users/ls/Desktop/out.txt", File.READ_WRITE)
+	file.seek_end()
+	file.store_line(s)
+	file.close()
+
+
 func _rows_to_cols(old):
 	var new = []
 	for i in range(9):
@@ -194,18 +253,20 @@ func _rows_to_cols(old):
 func _on_solve(col, row, box, n):
 	for cell in rows[row]:
 		cell.remove_markup(n)
-		cell.remove_note(n)
-		#cell.set_bg()
+		#cell.remove_note(n)
+#		cell.set_bg()
 		
 	for cell in cols[col]:
 		cell.remove_markup(n)
-		cell.remove_note(n)
-		#cell.set_bg()
+		#cell.remove_note(n)
+#		cell.set_bg()
 		
 	for cell in boxes[box]:
 		cell.remove_markup(n)
-		cell.remove_note(n)
-		#cell.set_bg()
+		#cell.remove_note(n)
+#		cell.set_bg()
 	
-	find_lonely()
+	#print('(', col, ', ', row, ') set to ', n)
+	mark_lonely()
+	#debug_txt('(' + str(col) + ', ' + str(row) + ') set to ' + str(n))
 	solved += 1

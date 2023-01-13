@@ -6,8 +6,9 @@ var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after
 var notes = [] # user notes
 var note_mode = false	# distinguish when entering solution (false) vs entering note (true)
 
-var solutions = []
+#var solutions = []
 var solution = 0
+var lonely = 0
 var solved = false
 var col = -1
 var row = -1
@@ -32,9 +33,12 @@ func _ready():
 
 func reset():
 	solution = 0
+	lonely = 0
 	solved = false
 	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-	notes = []
+	#notes = []
+	#$Solution.text = ''
+	#$Notes.visible = true
 	#set_bg()
 
 
@@ -112,18 +116,18 @@ func remove_markup(n):
 
 func input_solution(n):
 	n = int(n)
-	$Solution.self_modulate = Color.white
+	#$Solution.self_modulate = Color.white
 #	if n == solution:
 #		$Solution.self_modulate = Color.white
 #	else:
 #		$Solution.self_modulate = Color.crimson
 	
-	$Solution.text = str(n)
-	$Notes.visible = false
-	$Background.self_modulate = Color.black
+	#$Solution.text = str(n)
+	#$Notes.visible = false
+	#$Background.self_modulate = Color.black
 	solved = true
 	solution = n
-	solutions.append(n)
+#	solutions.append(n)
 	emit_signal("solve", col, row, box, n)
 
 
@@ -138,10 +142,10 @@ func show_solution():
 	$Solution.self_modulate = Color.black
 
 
-func show_average():
-	var avg = avg(solutions)
-	$Solution.text = str(avg)
-	#$Solution.self_modulate = Color.black
+#func show_average():
+#	var avg = avg(solutions)
+#	$Solution.text = str(avg)
+#	#$Solution.self_modulate = Color.black
 
 
 func avg(arr):
@@ -155,7 +159,8 @@ func avg(arr):
 func set_bg():
 	var value
 	if solved:
-		value = solution
+		#value = solution
+		return
 	else:
 		value = len(markup)
 	
