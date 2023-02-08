@@ -1,9 +1,10 @@
 extends Control
 
 signal solve(col, row, box, n)
+signal set(col, row, box, n)
 
 var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after solution generated
-var notes = [] # user notes
+var notes = [1, 2, 3, 4, 5, 6, 7, 8, 9] # user notes
 var note_mode = false	# distinguish when entering solution (false) vs entering note (true)
 
 #var solutions = []
@@ -22,7 +23,7 @@ var CELL_YELLOW = Color("ede989")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#tbd: apply solution number?
-	#set_bg()
+	set_bg()
 	pass # Replace with function body.
 
 
@@ -50,9 +51,9 @@ func set_coords():
 	var br = int(row/3)
 	box = bc + (3 * br)
 	
-	col += 1	#1-indexing
-	row += 1
-	box += 1
+#	col += 1	#1-indexing
+#	row += 1
+#	box += 1
 
 func random_choice(arr):
 	# Return random element from array
@@ -62,8 +63,14 @@ func random_choice(arr):
 
 func set_solution(n):
 	solution = n
-	emit_signal("solve", col, row, box, n)
+	emit_signal("set", col, row, box, n)
 	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+func set_random_solution():
+#	if solved: return
+	var rand = random_choice(markup)
+	set_solution(rand)
 
 
 func add_note(n):
@@ -116,16 +123,16 @@ func remove_markup(n):
 
 func input_solution(n):
 	n = int(n)
-	#$Solution.self_modulate = Color.white
 	if n == solution:
 		$Solution.self_modulate = Color.white
+		solved = true
 	else:
 		$Solution.self_modulate = Color.crimson
 	
 	$Solution.text = str(n)
 	$Notes.visible = false
 	#$Background.self_modulate = Color.black
-	solved = true
+#	solved = true
 	#solution = n
 #	solutions.append(n)
 	emit_signal("solve", col, row, box, n)
@@ -157,15 +164,10 @@ func avg(arr):
 
 
 func set_bg():
-	var value
-	if solved:
-		#value = solution
-		return
-	else:
-		value = len(markup)
+	if solved: return
 	
 	var color = Color.black
-	match value:
+	match len(markup):
 		1:
 			color = Color(1, 0, 0)
 		2:

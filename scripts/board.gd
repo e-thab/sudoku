@@ -1,12 +1,10 @@
 extends Node
 
 # Declare member variables here. Examples:
-var rows = [null, [], [], [], [], [], [], [], [], []]	#2D array [row][row index]
-var cols = [null, [], [], [], [], [], [], [], [], []]	#2D array [col][col index]
-var boxes = [null, [], [], [], [], [], [], [], [], []]	#2D array [box][col index]
-var solutions = [null]	# Array of solutions, 1-indexed
-						# Above arrays are 1-indexed for sudoku standards
-						# Boxes indexed left to right, top to bottom
+var rows = [[], [], [], [], [], [], [], [], []]	#2D array [row][row index]
+var cols = [[], [], [], [], [], [], [], [], []]	#2D array [col][col index]
+var boxes = [[], [], [], [], [], [], [], [], []]	#2D array [box][col index]
+var solutions = []	# Array of solutions, indexed left to right, top to bottom
 var cells = []	# Holds references to each cell, top left to bottom right
 var solved = 0
 var errors = 0
@@ -26,6 +24,7 @@ func _ready():
 		cols[cell.col].append(cell)
 		boxes[cell.box].append(cell)
 		cell.connect("solve", self, "_on_solve")
+		cell.connect("set", self, "_on_set")
 		cell.show_markup()
 	generate()
 	
@@ -50,12 +49,12 @@ func avg_test():
 
 func generate():
 	#print("generating")
-	solutions = [null, [], [], [], [], [], [], [], [], []]
+	solutions = [[], [], [], [], [], [], [], [], []]
 	reset_cells()
 	randomize_board()
 	
-	for cell in cells:
-		cell.set_bg()
+#	for cell in cells:
+#		cell.set_bg()
 	
 #	for i in range(1, len(rows)):			#load into solutions
 #		solutions.append([])
@@ -63,9 +62,9 @@ func generate():
 		#.insert(0, null)	#1-indexing
 #			solutions[i-1].append(cell.solution)
 	
-	for i in range(1, len(rows)):
-		for cell in rows[i]:
-			solutions[i].append(cell.solution)
+#	for i in range(1, len(rows)):
+#		for cell in rows[i]:
+#			solutions[i].append(cell.solution)
 	
 #	cols = _rows_to_cols(rows)
 	 #populate boxes?
@@ -105,7 +104,7 @@ func randomize_board():
 			#next_cell.input_solution(n)
 			
 		else:
-			next_cell.set_solution(random_choice(next_cell.markup))
+			next_cell.set_random_solution()
 			solved += 1
 			#next_cell.input_random_solution()
 		
@@ -125,8 +124,8 @@ func next_cell():
 			if cell.lonely != 0:
 				return cell
 				#cell.input_solution(cell.lonely)
-			#elif len(cell.markup) == 1:
-				#return cell
+			elif len(cell.markup) == 1:
+				return cell
 				#cell.input_solution(cell.markup[0])
 			elif len(cell.markup) < min_amt:
 				next_cell = cell
@@ -258,23 +257,34 @@ func _rows_to_cols(old):
 	return new
 
 
+func _on_set(col, row, box, n):
+#	for cell in rows[row]:
+#		cell.remove_markup(n)
+#
+#	for cell in cols[col]:
+#		cell.remove_markup(n)
+#
+#	for cell in boxes[box]:
+#		cell.remove_markup(n)
+	solved += 1
+
+
 func _on_solve(col, row, box, n):
 	for cell in rows[row]:
 		cell.remove_markup(n)
-#		cell.remove_note(n)
-#		cell.set_bg()
+		cell.remove_note(n)
+		cell.set_bg()
 		
 	for cell in cols[col]:
 		cell.remove_markup(n)
-#		cell.remove_note(n)
-#		cell.set_bg()
+		cell.remove_note(n)
+		cell.set_bg()
 		
 	for cell in boxes[box]:
 		cell.remove_markup(n)
-#		cell.remove_note(n)
-#		cell.set_bg()
+		cell.remove_note(n)
+		cell.set_bg()
 	
 	#print('(', col, ', ', row, ') set to ', n)
 	mark_lonely()
 	#debug_txt('(' + str(col) + ', ' + str(row) + ') set to ' + str(n))
-	solved += 1
