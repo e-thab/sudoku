@@ -5,11 +5,10 @@ var rows = [null, [], [], [], [], [], [], [], [], []]	#2D array [row][row index]
 var cols = [null, [], [], [], [], [], [], [], [], []]	#2D array [col][col index]
 var boxes = [null, [], [], [], [], [], [], [], [], []]	#2D array [box][col index]
 var solutions = [null]	# Array of solutions, 1-indexed
-							# Above arrays are 1-indexed for sudoku standards
-							# Boxes indexed left to right, top to bottom
+						# Above arrays are 1-indexed for sudoku standards
+						# Boxes indexed left to right, top to bottom
 var cells = []	# Holds references to each cell, top left to bottom right
 var solved = 0
-var error = false
 var errors = 0
 
 
@@ -28,47 +27,45 @@ func _ready():
 		boxes[cell.box].append(cell)
 		cell.connect("solve", self, "_on_solve")
 		cell.show_markup()
-	#generate()
+	generate()
 	
 #	for cell in cells:
 #		# delete this
 #		cell.show_solution()
-	avg_test()
+	#avg_test()
 
 
 func avg_test():
-# warning-ignore:unused_variable
 	var iterations = 1_000
 	
 	for _i in range(iterations):
 		generate()
-		for cell in cells:
-			cell.reset()
 		
 	#for cell in cells:
 		#cell.set_bg()
 		#cell.show_average()
-	print(errors)
+	print('Errors: ', errors)
 	print('Avg error rate: ', float(errors) / float(iterations))
 
 
 func generate():
 	#print("generating")
-#	solutions = [null, [], [], [], [], [], [], [], [], []]
+	solutions = [null, [], [], [], [], [], [], [], [], []]
+	reset_cells()
 	randomize_board()
 	
-#	for cell in cells:
-#		cell.set_bg()
+	for cell in cells:
+		cell.set_bg()
 	
 #	for i in range(1, len(rows)):			#load into solutions
 #		solutions.append([])
 #		for cell in rows[i]:
-#		#.insert(0, null)	#1-indexing
+		#.insert(0, null)	#1-indexing
 #			solutions[i-1].append(cell.solution)
 	
-#	for i in range(1, len(rows)):
-#		for cell in rows[i]:
-#			solutions[i].append(cell.solution)
+	for i in range(1, len(rows)):
+		for cell in rows[i]:
+			solutions[i].append(cell.solution)
 	
 #	cols = _rows_to_cols(rows)
 	 #populate boxes?
@@ -87,26 +84,32 @@ func randomize_board():
 	#var rnd = randi() % 9 + 1
 	#cells[0].set_solution(rnd)	# Set first rand solution in top left cell
 	#reset_debug()
-	while solved < 81 and !error:
+	while solved < 81:
 		#var min_cell = min_possible_cell()			# Get minimum possible solution cell
 		var next_cell = next_cell()
 		
 		if len(next_cell.markup) == 0:
-			errors += 1
-			error = true
+			print("ERROR: Regenerating...")
+			generate()
+			break
 		
 		elif next_cell.lonely != 0:
-			next_cell.input_solution(next_cell.lonely)
+			#next_cell.input_solution(next_cell.lonely)
+			next_cell.set_solution(next_cell.lonely)
+			solved += 1
 			
-#		elif len(next_cell.markup) == 1:
-#			var n = next_cell.markup[0]
-#			next_cell.input_solution(n)
+		elif len(next_cell.markup) == 1:
+			var n = next_cell.markup[0]
+			next_cell.set_solution(n)
+			solved += 1
+			#next_cell.input_solution(n)
 			
 		else:
-			next_cell.input_random_solution()
+			next_cell.set_solution(random_choice(next_cell.markup))
+			solved += 1
+			#next_cell.input_random_solution()
 		
-		#mark_lonely()
-	error = false
+		mark_lonely()
 	solved = 0
 	
 #	for cell in cells:
@@ -144,6 +147,11 @@ func min_possible_cell():
 			min_amt = len(cell.markup)
 	
 	return min_cell
+
+
+func reset_cells():
+	for cell in cells:
+		cell.reset()
 
 
 func random_choice(arr):
@@ -191,7 +199,7 @@ func mark_lonely():
 			for n in cell.markup:
 				if is_lonely(cell.col, cell.row, cell.box, n):
 					cell.lonely = n
-					#cell.highlight_markup(n)
+					cell.highlight_markup(n)
 					#cell.input_solution(n)
 					return
 
@@ -253,17 +261,17 @@ func _rows_to_cols(old):
 func _on_solve(col, row, box, n):
 	for cell in rows[row]:
 		cell.remove_markup(n)
-		#cell.remove_note(n)
+#		cell.remove_note(n)
 #		cell.set_bg()
 		
 	for cell in cols[col]:
 		cell.remove_markup(n)
-		#cell.remove_note(n)
+#		cell.remove_note(n)
 #		cell.set_bg()
 		
 	for cell in boxes[box]:
 		cell.remove_markup(n)
-		#cell.remove_note(n)
+#		cell.remove_note(n)
 #		cell.set_bg()
 	
 	#print('(', col, ', ', row, ') set to ', n)

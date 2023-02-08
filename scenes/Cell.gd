@@ -36,10 +36,10 @@ func reset():
 	lonely = 0
 	solved = false
 	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-	#notes = []
-	#$Solution.text = ''
-	#$Notes.visible = true
-	#set_bg()
+	notes = []
+	$Solution.text = ''
+	$Notes.visible = true
+	set_bg()
 
 
 func set_coords():
@@ -63,7 +63,7 @@ func random_choice(arr):
 func set_solution(n):
 	solution = n
 	emit_signal("solve", col, row, box, n)
-#	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 func add_note(n):
@@ -117,16 +117,16 @@ func remove_markup(n):
 func input_solution(n):
 	n = int(n)
 	#$Solution.self_modulate = Color.white
-#	if n == solution:
-#		$Solution.self_modulate = Color.white
-#	else:
-#		$Solution.self_modulate = Color.crimson
+	if n == solution:
+		$Solution.self_modulate = Color.white
+	else:
+		$Solution.self_modulate = Color.crimson
 	
-	#$Solution.text = str(n)
-	#$Notes.visible = false
+	$Solution.text = str(n)
+	$Notes.visible = false
 	#$Background.self_modulate = Color.black
 	solved = true
-	solution = n
+	#solution = n
 #	solutions.append(n)
 	emit_signal("solve", col, row, box, n)
 
