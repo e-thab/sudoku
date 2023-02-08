@@ -5,9 +5,11 @@ var rows = [[], [], [], [], [], [], [], [], []]	#2D array [row][row index]
 var cols = [[], [], [], [], [], [], [], [], []]	#2D array [col][col index]
 var boxes = [[], [], [], [], [], [], [], [], []]	#2D array [box][col index]
 var solutions = []	# Array of solutions, indexed left to right, top to bottom
+
 var cells = []	# Holds references to each cell, top left to bottom right
-var solved = 0
-var errors = 0
+var generated = 0	# Number of solutions generated (each individual number on the board)
+
+var errors = 0	# For testing error rate of generation algorithm
 
 
 #func _init():
@@ -28,9 +30,9 @@ func _ready():
 		cell.show_markup()
 	generate()
 	
-#	for cell in cells:
-#		# delete this
-#		cell.show_solution()
+	for cell in cells:
+		# delete this
+		cell.show_solution()
 	#avg_test()
 
 
@@ -44,7 +46,7 @@ func avg_test():
 		#cell.set_bg()
 		#cell.show_average()
 	print('Errors: ', errors)
-	print('Avg error rate: ', float(errors) / float(iterations))
+	print('Error rate: ', float(errors) / float(iterations))
 
 
 func generate():
@@ -74,48 +76,53 @@ func generate():
 
 
 func randomize_board():
-	# 1: find any cells with lonely digits, fill them if they exist
-	# 2: find any cells with naked singles, fill them if they exist
+	# 1: find any cells with lonely digits, if one exists: fill it and go to step 1
+	# 2: find any cells with naked singles, if one exists: fill it and go to step 1
 	# 3: find the next unsolved cell with the fewest possibilities
 	# 4: fill cell with a random number generated from those possibilities
 	# 5: repeat
-	
-	#var rnd = randi() % 9 + 1
-	#cells[0].set_solution(rnd)	# Set first rand solution in top left cell
-	#reset_debug()
-	while solved < 81:
+	#
+	# Testing shows this algorithm has around a 1.8% error rate (chance to generate a dead-end),
+	# so it just resets and tries again if it fails
+
+	generated = 0
+	while generated < 81:
 		#var min_cell = min_possible_cell()			# Get minimum possible solution cell
 		var next_cell = next_cell()
 		
 		if len(next_cell.markup) == 0:
 			print("ERROR: Regenerating...")
+			debug_txt("ERROR: Regenerating...")
 			generate()
 			break
 		
 		elif next_cell.lonely != 0:
 			#next_cell.input_solution(next_cell.lonely)
 			next_cell.set_solution(next_cell.lonely)
-			solved += 1
+			generated += 1
+			debug_set(next_cell, next_cell.lonely)
 			
 		elif len(next_cell.markup) == 1:
 			var n = next_cell.markup[0]
 			next_cell.set_solution(n)
-			solved += 1
+			generated += 1
 			#next_cell.input_solution(n)
+			debug_set(next_cell, n)
 			
 		else:
 			next_cell.set_random_solution()
-			solved += 1
+			generated += 1
 			#next_cell.input_random_solution()
-		
+			debug_set(next_cell, next_cell.solution)
+			
 		mark_lonely()
-	solved = 0
 	
 #	for cell in cells:
 #		solutions.append(cell.solution)
 
 
 func next_cell():
+	# generation issue may be here
 	var min_amt = 10
 	var next_cell
 	
@@ -130,7 +137,7 @@ func next_cell():
 			elif len(cell.markup) < min_amt:
 				next_cell = cell
 				min_amt = len(cell.markup)
-		
+	
 	return next_cell
 	
 
@@ -248,6 +255,10 @@ func debug_txt(s):
 	file.close()
 
 
+func debug_set(cell, n):
+	debug_txt("(" + str(cell.col) + ", " + str(cell.row) + ", " + str(cell.box) + ") set to " + str(n))
+
+
 func _rows_to_cols(old):
 	var new = []
 	for i in range(9):
@@ -257,32 +268,27 @@ func _rows_to_cols(old):
 	return new
 
 
-func _on_set(col, row, box, n):
-#	for cell in rows[row]:
-#		cell.remove_markup(n)
-#
-#	for cell in cols[col]:
-#		cell.remove_markup(n)
-#
-#	for cell in boxes[box]:
-#		cell.remove_markup(n)
-	solved += 1
+func _on_set():
+	generated += 1
 
 
 func _on_solve(col, row, box, n):
 	for cell in rows[row]:
 		cell.remove_markup(n)
-		cell.remove_note(n)
+		#cell.remove_note(n)
+		cell.show_markup()
 		cell.set_bg()
 		
 	for cell in cols[col]:
 		cell.remove_markup(n)
-		cell.remove_note(n)
+		#cell.remove_note(n)
+		cell.show_markup()
 		cell.set_bg()
 		
 	for cell in boxes[box]:
 		cell.remove_markup(n)
-		cell.remove_note(n)
+		#cell.remove_note(n)
+		cell.show_markup()
 		cell.set_bg()
 	
 	#print('(', col, ', ', row, ') set to ', n)

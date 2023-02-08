@@ -1,7 +1,7 @@
 extends Control
 
 signal solve(col, row, box, n)
-signal set(col, row, box, n)
+signal set()
 
 var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after solution generated
 var notes = [1, 2, 3, 4, 5, 6, 7, 8, 9] # user notes
@@ -63,8 +63,7 @@ func random_choice(arr):
 
 func set_solution(n):
 	solution = n
-	emit_signal("set", col, row, box, n)
-	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+	emit_signal("set")
 
 
 func set_random_solution():
@@ -248,6 +247,7 @@ func _on_Cell_gui_input(event):
 				else:
 					input_solution(num)
 					release_focus()
+			print("(", col, ", ", row, ", ", box, ")")
 	
 	elif Input.is_action_just_pressed("note"):
 		grab_focus()
