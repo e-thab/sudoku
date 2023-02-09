@@ -1,10 +1,9 @@
 extends Control
 
 signal solve(col, row, box, n)
-signal set()
 
 var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after solution generated
-var notes = [1, 2, 3, 4, 5, 6, 7, 8, 9] # user notes
+var notes = [] # user notes
 var note_mode = false	# distinguish when entering solution (false) vs entering note (true)
 
 #var solutions = []
@@ -23,7 +22,7 @@ var CELL_YELLOW = Color("ede989")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#tbd: apply solution number?
-	set_bg()
+	#set_bg()
 	pass # Replace with function body.
 
 
@@ -40,6 +39,15 @@ func reset():
 	notes = []
 	$Solution.text = ''
 	$Notes.visible = true
+	set_bg()
+
+
+func prep():
+#	lonely = 0
+	solved = false
+	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] #?
+	notes = []
+	show_markup()
 	set_bg()
 
 
@@ -61,29 +69,26 @@ func random_choice(arr):
 		return arr[randi() % len(arr)]
 
 
-func set_solution(n):
-	solution = n
-	emit_signal("set")
-
-
-func set_random_solution():
-#	if solved: return
-	var rand = random_choice(markup)
-	set_solution(rand)
-
-
-func add_note(n):
+func input_note(n):
 	if solved: return
 		
 	n = int(n)
 	if n in notes:
 		remove_note(n)
 	else:
-		notes.append(n)
-		if n in markup:
-			$Notes.get_child(n-1).self_modulate = Color.white
-		else:
-			$Notes.get_child(n-1).self_modulate = Color.crimson
+		add_note(n)
+#		notes.append(n)
+
+
+func add_note(n):
+	if solved: return
+	
+	n = int(n)
+	notes.append(n)
+	if n in markup:
+		$Notes.get_child(n-1).self_modulate = Color.white
+	else:
+		$Notes.get_child(n-1).self_modulate = Color.crimson
 
 
 func remove_note(n):
@@ -143,9 +148,25 @@ func input_random_solution():
 	input_solution(rand)
 
 
+func set_solution(n):
+	solution = n
+	solved = true
+	emit_signal("solve", col, row, box, n)
+
+
+func set_random_solution():
+#	if solved: return
+	var rand = random_choice(markup)
+	set_solution(rand)
+
+
 func show_solution():
 	$Solution.text = str(solution)
 	$Solution.self_modulate = Color.black
+
+
+func solve():
+	input_solution(solution)
 
 
 #func show_average():
@@ -243,7 +264,7 @@ func _on_Cell_gui_input(event):
 			var num = interpret_num(event)
 			if num != null:
 				if note_mode:
-					add_note(num)
+					input_note(num)
 				else:
 					input_solution(num)
 					release_focus()
