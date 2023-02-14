@@ -8,6 +8,7 @@ var solutions = [[], [], [], [], [], [], [], [], []]	#Array of solutions, indexe
 
 var cells = []	# Holds references to each cell object, top left to bottom right
 var generated = 0	# Number of cells filled during generation
+var solved = 0	# For keeping track of number solved, win when = 81
 var errors = 0	# For testing error rate of generation algorithm
 
 
@@ -26,6 +27,7 @@ func _ready():
 		cols[cell.col].append(cell)
 		boxes[cell.box].append(cell)
 		cell.connect("solve", self, "_on_solve")
+		cell.connect("assign", self, "update_markup")
 		cell.show_markup()
 	
 	generate()
@@ -116,7 +118,7 @@ func randomize_clues():
 	var cells_copy = cells.duplicate()
 	cells_copy.shuffle()
 	
-	for i in range(25):
+	for i in range(35):
 		cells_copy[i].solve()
 
 
@@ -214,20 +216,29 @@ func debug_set(cell, n):
 	debug_txt("(" + str(cell.col) + ", " + str(cell.row) + ", " + str(cell.box) + ") set to " + str(n))
 
 
-func _on_solve(col, row, box, n):
+func update_markup(col, row, box, n):
 	for cell in rows[row]:
 		cell.remove_markup(n)
 		cell.show_markup()
-		cell.set_bg()
+		#cell.set_bg()
 		
 	for cell in cols[col]:
 		cell.remove_markup(n)
 		cell.show_markup()
-		cell.set_bg()
+		#cell.set_bg()
 		
 	for cell in boxes[box]:
 		cell.remove_markup(n)
 		cell.show_markup()
-		cell.set_bg()
+		#cell.set_bg()
 	
 	mark_lonely()
+
+
+func _on_solve(col, row, box, n):
+	if solved == 80:
+		print('you are win')
+	else:
+		solved += 1
+	
+	update_markup(col, row, box, n)

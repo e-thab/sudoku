@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/GridLarge.png-c4fbd317df1b4c3cefdee3158bf991aa.stex"
+path="res://.import/grid_large.png-bb18153809c0ce764a078bcabe0142fd.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/GridLarge.png"
-dest_files=[ "res://.import/GridLarge.png-c4fbd317df1b4c3cefdee3158bf991aa.stex" ]
+source_file="res://assets/grid_large.png"
+dest_files=[ "res://.import/grid_large.png-bb18153809c0ce764a078bcabe0142fd.stex" ]
 
 [params]
 

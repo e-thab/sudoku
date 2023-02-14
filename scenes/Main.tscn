@@ -1,11 +1,17 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://assets/GridSmall.png" type="Texture" id=1]
-[ext_resource path="res://assets/GridLarge.png" type="Texture" id=2]
 [ext_resource path="res://assets/Sq.png" type="Texture" id=3]
 [ext_resource path="res://scenes/Cell.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/Main.gd" type="Script" id=5]
 [ext_resource path="res://scripts/board.gd" type="Script" id=6]
+[ext_resource path="res://assets/grid_large.png" type="Texture" id=7]
+[ext_resource path="res://assets/grid_small.png" type="Texture" id=8]
+
+[sub_resource type="StreamTexture" id=1]
+flags = 4
+
+[sub_resource type="StreamTexture" id=2]
+flags = 4
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
@@ -13,11 +19,92 @@ anchor_bottom = 1.0
 mouse_filter = 1
 script = ExtResource( 5 )
 
-[node name="Background" type="TextureRect" parent="."]
-self_modulate = Color( 0.364706, 0.537255, 0.52549, 1 )
+[node name="BackgroundSquares" type="GridContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+custom_constants/vseparation = 0
+custom_constants/hseparation = 0
+columns = 3
+
+[node name="1" type="TextureRect" parent="BackgroundSquares"]
+self_modulate = Color( 0.662745, 0.784314, 0.788235, 1 )
+margin_right = 342.0
+margin_bottom = 342.0
+rect_min_size = Vector2( 342, 342 )
 texture = ExtResource( 3 )
+expand = true
+
+[node name="2" type="TextureRect" parent="BackgroundSquares"]
+margin_left = 342.0
+margin_right = 684.0
+margin_bottom = 342.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="3" type="TextureRect" parent="BackgroundSquares"]
+self_modulate = Color( 0.662745, 0.784314, 0.788235, 1 )
+margin_left = 684.0
+margin_right = 1026.0
+margin_bottom = 342.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="4" type="TextureRect" parent="BackgroundSquares"]
+margin_top = 342.0
+margin_right = 342.0
+margin_bottom = 684.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="5" type="TextureRect" parent="BackgroundSquares"]
+self_modulate = Color( 0.662745, 0.784314, 0.788235, 1 )
+margin_left = 342.0
+margin_top = 342.0
+margin_right = 684.0
+margin_bottom = 684.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="6" type="TextureRect" parent="BackgroundSquares"]
+margin_left = 684.0
+margin_top = 342.0
+margin_right = 1026.0
+margin_bottom = 684.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="7" type="TextureRect" parent="BackgroundSquares"]
+self_modulate = Color( 0.662745, 0.784314, 0.788235, 1 )
+margin_top = 684.0
+margin_right = 342.0
+margin_bottom = 1026.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="8" type="TextureRect" parent="BackgroundSquares"]
+margin_left = 342.0
+margin_top = 684.0
+margin_right = 684.0
+margin_bottom = 1026.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
+
+[node name="9" type="TextureRect" parent="BackgroundSquares"]
+self_modulate = Color( 0.662745, 0.784314, 0.788235, 1 )
+margin_left = 684.0
+margin_top = 684.0
+margin_right = 1026.0
+margin_bottom = 1026.0
+rect_min_size = Vector2( 342, 342 )
+texture = ExtResource( 3 )
+expand = true
 
 [node name="Cells" type="GridContainer" parent="."]
 anchor_right = 1.0
@@ -837,8 +924,9 @@ margin_top = 912.0
 margin_right = 1026.0
 margin_bottom = 1026.0
 
-[node name="Grid" type="GridContainer" parent="."]
-modulate = Color( 0.666667, 0.666667, 0.666667, 1 )
+[node name="GridSquares" type="GridContainer" parent="."]
+visible = false
+modulate = Color( 0.521569, 0.521569, 0.521569, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -846,75 +934,89 @@ custom_constants/vseparation = 0
 custom_constants/hseparation = 0
 columns = 3
 
-[node name="Box1" type="TextureRect" parent="Grid"]
+[node name="Box1" type="TextureRect" parent="GridSquares"]
 margin_right = 342.0
 margin_bottom = 342.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box2" type="TextureRect" parent="Grid"]
+[node name="Box2" type="TextureRect" parent="GridSquares"]
 margin_left = 342.0
 margin_right = 684.0
 margin_bottom = 342.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box3" type="TextureRect" parent="Grid"]
+[node name="Box3" type="TextureRect" parent="GridSquares"]
 margin_left = 684.0
 margin_right = 1026.0
 margin_bottom = 342.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box4" type="TextureRect" parent="Grid"]
+[node name="Box4" type="TextureRect" parent="GridSquares"]
 margin_top = 342.0
 margin_right = 342.0
 margin_bottom = 684.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box5" type="TextureRect" parent="Grid"]
+[node name="Box5" type="TextureRect" parent="GridSquares"]
 margin_left = 342.0
 margin_top = 342.0
 margin_right = 684.0
 margin_bottom = 684.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box6" type="TextureRect" parent="Grid"]
+[node name="Box6" type="TextureRect" parent="GridSquares"]
 margin_left = 684.0
 margin_top = 342.0
 margin_right = 1026.0
 margin_bottom = 684.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box7" type="TextureRect" parent="Grid"]
+[node name="Box7" type="TextureRect" parent="GridSquares"]
 margin_top = 684.0
 margin_right = 342.0
 margin_bottom = 1026.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box8" type="TextureRect" parent="Grid"]
+[node name="Box8" type="TextureRect" parent="GridSquares"]
 margin_left = 342.0
 margin_top = 684.0
 margin_right = 684.0
 margin_bottom = 1026.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
 
-[node name="Box9" type="TextureRect" parent="Grid"]
+[node name="Box9" type="TextureRect" parent="GridSquares"]
 margin_left = 684.0
 margin_top = 684.0
 margin_right = 1026.0
 margin_bottom = 1026.0
 mouse_filter = 2
-texture = ExtResource( 1 )
+texture = SubResource( 1 )
+
+[node name="GridSmall" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 8 )
+
+[node name="GridLarge2" type="TextureRect" parent="."]
+self_modulate = Color( 0.882353, 0.882353, 0.882353, 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 7 )
 
 [node name="GridLarge" type="TextureRect" parent="."]
+visible = false
 self_modulate = Color( 0.0588235, 0.0588235, 0.0588235, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource( 2 )
+texture = SubResource( 2 )

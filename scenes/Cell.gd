@@ -1,6 +1,7 @@
 extends Control
 
 signal solve(col, row, box, n)
+signal assign(col, row, box, n)
 
 var markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] # actual possible answers, culled after solution generated
 var notes = [] # user notes
@@ -15,7 +16,8 @@ var row = -1
 var box = -1	#3x3 set of cells. indexed left->right then top->bottom
 
 #var GRID_PURPLE = Color("7b5974")
-var CELL_AQUA = Color("75d1be")
+#var CELL_AQUA = Color("75d1be")
+var CELL_PURPLE = Color("a375d1")
 var CELL_YELLOW = Color("ede989")
 
 
@@ -39,7 +41,7 @@ func reset():
 	notes = []
 	$Solution.text = ''
 	$Notes.visible = true
-	set_bg()
+	#set_bg()
 
 
 func prep():
@@ -48,7 +50,7 @@ func prep():
 	markup = [1, 2, 3, 4, 5, 6, 7, 8, 9] #?
 	notes = []
 	show_markup()
-	set_bg()
+	#set_bg()
 
 
 func set_coords():
@@ -58,10 +60,6 @@ func set_coords():
 	var bc = int(col/3)
 	var br = int(row/3)
 	box = bc + (3 * br)
-	
-#	col += 1	#1-indexing
-#	row += 1
-#	box += 1
 
 func random_choice(arr):
 	# Return random element from array
@@ -77,7 +75,6 @@ func input_note(n):
 		remove_note(n)
 	else:
 		add_note(n)
-#		notes.append(n)
 
 
 func add_note(n):
@@ -86,7 +83,7 @@ func add_note(n):
 	n = int(n)
 	notes.append(n)
 	if n in markup:
-		$Notes.get_child(n-1).self_modulate = Color.white
+		$Notes.get_child(n-1).self_modulate = Color.midnightblue
 	else:
 		$Notes.get_child(n-1).self_modulate = Color.crimson
 
@@ -117,7 +114,7 @@ func show_markup():
 
 
 func highlight_markup(n):
-	$Notes.get_child(n-1).self_modulate = $Background.self_modulate.inverted()
+	$Notes.get_child(n-1).self_modulate = Color.fuchsia
 
 
 func remove_markup(n):
@@ -128,18 +125,14 @@ func remove_markup(n):
 func input_solution(n):
 	n = int(n)
 	if n == solution:
-		$Solution.self_modulate = Color.white
+		$Solution.self_modulate = Color.black
+		$Notes.visible = false
 		solved = true
+		emit_signal("solve", col, row, box, n)
 	else:
 		$Solution.self_modulate = Color.crimson
 	
 	$Solution.text = str(n)
-	$Notes.visible = false
-	#$Background.self_modulate = Color.black
-#	solved = true
-	#solution = n
-#	solutions.append(n)
-	emit_signal("solve", col, row, box, n)
 
 
 func input_random_solution():
@@ -151,7 +144,7 @@ func input_random_solution():
 func set_solution(n):
 	solution = n
 	solved = true
-	emit_signal("solve", col, row, box, n)
+	emit_signal("assign", col, row, box, n)
 
 
 func set_random_solution():
@@ -209,12 +202,6 @@ func set_bg():
 	$Background.self_modulate = color
 
 
-#func remove_solution():
-#	$Solution.text = ''
-#	$Notes.visible = true
-#	solved = false
-
-
 func input_is_num(event):
 	if event is InputEventKey and event.is_pressed():
 		return interpret_num(event) != null
@@ -227,12 +214,12 @@ func interpret_num(event):
 
 
 func _on_Cell_focus_entered():
-	#print('(r', row, ' c', col, ': b', box, ')')
+#	print('(r', row, ' c', col, ': b', box, ')')
 	$Select_Highlight.show()
 
 
 func _on_Cell_focus_exited():
-	$Select_Highlight.self_modulate = CELL_AQUA
+	$Select_Highlight.self_modulate = CELL_PURPLE
 	$Select_Highlight.hide()
 	
 	# if mouse is not over cell: ?
@@ -268,7 +255,7 @@ func _on_Cell_gui_input(event):
 				else:
 					input_solution(num)
 					release_focus()
-			print("(", col, ", ", row, ", ", box, ")")
+#			print("(", col, ", ", row, ", ", box, ")")
 	
 	elif Input.is_action_just_pressed("note"):
 		grab_focus()
@@ -276,5 +263,5 @@ func _on_Cell_gui_input(event):
 		note_mode = true
 	
 	elif Input.is_action_just_pressed("select"):
-		$Select_Highlight.self_modulate = CELL_AQUA
+		$Select_Highlight.self_modulate = CELL_PURPLE
 		note_mode = false
