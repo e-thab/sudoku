@@ -110,7 +110,7 @@ func randomize_solutions():
 			next_cell.set_random_solution()
 			generated += 1
 			
-		mark_lonely()
+#		mark_lonely()
 
 # Generate clues
 func randomize_clues():
@@ -126,11 +126,6 @@ func randomize_clues():
 func next_cell():
 	var min_amt = 10
 	var next_cell
-	
-#	# Find/fill lonely
-#	for i in range(9):
-#		for cell in cols[i]:
-#
 	
 	for cell in cells:
 		if !cell.solved:
@@ -163,7 +158,6 @@ func mark_lonely():
 					cell.lonely = n
 					cell.highlight_markup(n)
 					return
-
 
 
 func is_lonely(col, row, box, n):
@@ -214,6 +208,38 @@ func debug_txt(s):
 # Add debug line showing cell solution set
 func debug_set(cell, n):
 	debug_txt("(" + str(cell.col) + ", " + str(cell.row) + ", " + str(cell.box) + ") set to " + str(n))
+
+
+func reset_markup():
+	for cell in cells:
+		cell.markup = []
+	
+	for col in range(9):
+		for row in range(9):
+			for box in range(9):
+				for n in range(1, 10):
+					if valid_markup(col, row, box, n):
+						cells[row][col].markup.append(n)
+
+
+func get_neighbors(col, row, box):
+	# return an array of all the cells that can see indicated cell
+	var neighbors = []
+	return neighbors
+
+
+func valid_markup(col, row, box, n):
+	for cell in rows[row]:
+		if cell.visible_solution == n:
+			return false
+	
+	for cell in cols[col]:
+		if cell.solution == n:
+			return false
+	
+	for cell in boxes[box]:
+		if cell.solution == n:
+			return false
 
 
 func update_markup(col, row, box, n):

@@ -9,6 +9,7 @@ var note_mode = false	# distinguish when entering solution (false) vs entering n
 
 #var solutions = []
 var solution = 0
+var visible_solution = 0
 var lonely = 0
 var solved = false
 var col = -1
@@ -29,8 +30,16 @@ func _ready():
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _process(delta):
+	if has_focus():
+		if Input.is_action_just_pressed("note_shift"):
+			print(notes)
+			$Select_Highlight.self_modulate = CELL_YELLOW
+			note_mode = true
+			
+		elif Input.is_action_just_released("note_shift"):
+			$Select_Highlight.self_modulate = CELL_PURPLE
+			note_mode = false
 
 
 func reset():
@@ -81,9 +90,12 @@ func add_note(n):
 	if solved: return
 	
 	n = int(n)
-	notes.append(n)
+	
+	if not n in notes:
+		notes.append(n)
+	
 	if n in markup:
-		$Notes.get_child(n-1).self_modulate = Color.midnightblue
+		$Notes.get_child(n-1).self_modulate = Color.dimgray
 	else:
 		$Notes.get_child(n-1).self_modulate = Color.crimson
 
@@ -93,6 +105,7 @@ func remove_note(n):
 	
 	n = int(n)
 	if n in notes:
+		#print('erasing ', n, ' from notes')
 		notes.erase(n)
 		$Notes.get_child(n-1).self_modulate = Color.transparent
 
@@ -123,6 +136,8 @@ func remove_markup(n):
 
 
 func input_solution(n):
+	if solved: return
+
 	n = int(n)
 	if n == solution:
 		$Solution.self_modulate = Color.black
@@ -132,6 +147,7 @@ func input_solution(n):
 	else:
 		$Solution.self_modulate = Color.crimson
 	
+	visible_solution = n
 	$Solution.text = str(n)
 
 
@@ -154,8 +170,14 @@ func set_random_solution():
 
 
 func show_solution():
+	visible_solution = solution
 	$Solution.text = str(solution)
 	$Solution.self_modulate = Color.black
+
+
+func remove_solution():
+	visible_solution = 0
+	$Solution.text = ""
 
 
 func solve():
@@ -207,6 +229,7 @@ func input_is_num(event):
 		return interpret_num(event) != null
 	return false
 
+
 func interpret_num(event):
 	var input_string = OS.get_scancode_string(event.scancode)
 	if int(input_string) in range(1, 10):
@@ -221,10 +244,8 @@ func _on_Cell_focus_entered():
 func _on_Cell_focus_exited():
 	$Select_Highlight.self_modulate = CELL_PURPLE
 	$Select_Highlight.hide()
-	
 	# if mouse is not over cell: ?
 	$Hover_Highlight.hide()
-	
 	note_mode = false
 
 
@@ -241,8 +262,8 @@ func _on_Cell_gui_input(event):
 		if Input.is_action_just_pressed("ui_cancel"):
 			release_focus()
 		
-#		elif Input.is_action_just_pressed("delete"):
-#			remove_solution()
+		elif Input.is_action_just_pressed("delete"):
+			remove_solution()
 		
 		elif Input.is_action_just_pressed("random_val"):
 			input_random_solution()
@@ -257,11 +278,11 @@ func _on_Cell_gui_input(event):
 					release_focus()
 #			print("(", col, ", ", row, ", ", box, ")")
 	
-	elif Input.is_action_just_pressed("note"):
-		grab_focus()
-		$Select_Highlight.self_modulate = CELL_YELLOW
-		note_mode = true
+#	elif Input.is_action_just_pressed("note"):
+#		grab_focus()
+#		$Select_Highlight.self_modulate = CELL_YELLOW
+#		note_mode = true
 	
 	elif Input.is_action_just_pressed("select"):
 		$Select_Highlight.self_modulate = CELL_PURPLE
-		note_mode = false
+#		note_mode = false
